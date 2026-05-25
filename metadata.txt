@@ -11,7 +11,7 @@ about=River Slope Calculator computes the slope of each river reach feature (lin
     <br><br>
     Both methods produce dimensionless slope values (m/m), added as new fields on a copy of the input reach layer. DEM elevation is sampled at a user-defined interval along each reach using trapezoidal integration for the Equal Area Slope.
 
-version=1.0.0
+version=1.0.1
 author=Irene Jaya
 email=irenejaya1@gmail.com
 tracker=https://github.com/irenejaya/slope-calculator/issues
