@@ -45,6 +45,8 @@ from ..utils.constants import (
     DEFAULT_SAMPLING_INTERVAL,
     DEFAULT_FIELD_AVERAGE,
     DEFAULT_FIELD_EAS,
+    UNIT_CHOICES,
+    UNIT_MULTIPLIERS,
 )
 from ..utils.slope_utils import (
     sample_dem_at_endpoints,
@@ -68,6 +70,7 @@ class ReachSlopeAlgorithm(QgsProcessingAlgorithm):
     INTERVAL = 'INTERVAL'
     FIELD_AVERAGE = 'FIELD_AVERAGE'
     FIELD_EAS = 'FIELD_EAS'
+    UNIT = 'UNIT'
     OUTPUT = 'OUTPUT'
 
     METHOD_CHOICES = ['Average Slope', 'Equal Area Slope', 'Both']
@@ -103,7 +106,8 @@ class ReachSlopeAlgorithm(QgsProcessingAlgorithm):
             'and below the longitudinal profile. Used in ARR 1987 Bransby Williams '
             'time-of-concentration formula.<br><br>'
             '<b>Output:</b> Copy of the reach layer with one or two new slope '
-            'fields (dimensionless, m/m).<br><br>'
+            'fields. Unit is selectable: <b>m/m</b> (dimensionless) or '
+            '<b>%</b> (percent).<br><br>'
             '<b>Note:</b> DEM elevation values must be in metres.'
         )
 
@@ -153,6 +157,13 @@ class ReachSlopeAlgorithm(QgsProcessingAlgorithm):
             defaultValue=DEFAULT_FIELD_EAS,
         ))
 
+        self.addParameter(QgsProcessingParameterEnum(
+            self.UNIT,
+            'Output unit',
+            options=UNIT_CHOICES,
+            defaultValue=0,
+        ))
+
         self.addParameter(QgsProcessingParameterFeatureSink(
             self.OUTPUT,
             'Output reach layer with slope fields',
@@ -169,6 +180,8 @@ class ReachSlopeAlgorithm(QgsProcessingAlgorithm):
         interval = self.parameterAsDouble(parameters, self.INTERVAL, context)
         field_avg = self.parameterAsString(parameters, self.FIELD_AVERAGE, context).strip() or DEFAULT_FIELD_AVERAGE
         field_eas = self.parameterAsString(parameters, self.FIELD_EAS, context).strip() or DEFAULT_FIELD_EAS
+        unit_idx = self.parameterAsEnum(parameters, self.UNIT, context)
+        unit_multiplier = UNIT_MULTIPLIERS[unit_idx]
 
         do_avg = method_idx in (0, 2)
         do_eas = method_idx in (1, 2)
@@ -276,12 +289,14 @@ class ReachSlopeAlgorithm(QgsProcessingAlgorithm):
             attr_idx = n_input_fields
             if do_avg:
                 out_feat.setAttribute(
-                    attr_idx, slope_avg if slope_avg is not None else NULL
+                    attr_idx,
+                    slope_avg * unit_multiplier if slope_avg is not None else NULL,
                 )
                 attr_idx += 1
             if do_eas:
                 out_feat.setAttribute(
-                    attr_idx, slope_eas if slope_eas is not None else NULL
+                    attr_idx,
+                    slope_eas * unit_multiplier if slope_eas is not None else NULL,
                 )
 
             sink.addFeature(out_feat, QgsFeatureSink.Flag.FastInsert)
