@@ -1,0 +1,37 @@
+[general]
+name=River Slope Calculator
+qgisMinimumVersion=3.34
+qgisMaximumVersion=4.99
+description=Calculate river reach slope from a DEM using Average Slope or Equal Area Slope.
+about=River Slope Calculator computes the slope of each river reach feature (line or multiline) from an underlying DEM raster, supporting two methods:
+    <br><br>
+    <b>1. Average Slope (Mean Gradient)</b> — The absolute elevation difference between reach endpoints divided by the total reach length. The simplest and most commonly used slope measure.
+    <br><br>
+    <b>2. Equal Area Slope</b> — The slope of a line through the outlet that creates equal areas above and below the longitudinal elevation profile. Adopted in Australian Rainfall and Runoff (ARR, 1987) for the Bransby Williams time-of-concentration formula. Reference: Ladson (2017), NZ Ministry of Works (1980).
+    <br><br>
+    Both methods produce dimensionless slope values (m/m), added as new fields on a copy of the input reach layer. DEM elevation is sampled at a user-defined interval along each reach using trapezoidal integration for the Equal Area Slope.
+
+version=1.0.0
+author=Irene Jaya
+email=irenejaya1@gmail.com
+tracker=https://github.com/irenejaya/slope-calculator/issues
+repository=https://github.com/irenejaya/slope-calculator
+homepage=https://github.com/irenejaya/slope-calculator
+
+tags=python,hydrology,slope,river,reach,DEM,equal area slope,ARR,RORB,drainage
+
+icon=icon.svg
+
+experimental=False
+deprecated=False
+hasProcessingProvider=yes
+server=False
+
+changelog=
+    1.0.1 - Make plugin not experimental
+    1.0.0 - Initial release
+        * Average Slope (Mean Gradient) calculation from DEM endpoints
+        * Equal Area Slope calculation using trapezoidal integration of the longitudinal profile
+        * Interactive dialog with reach layer + DEM selection, sampling interval, method toggles, and customisable output field names
+        * Background processing thread with progress bar and log panel
+        * Output written to a temporary copy of the reach layer (line / multiline supported)
