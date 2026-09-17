@@ -18,7 +18,7 @@ tracker=https://github.com/irenejaya/slope-calculator/issues
 repository=https://github.com/irenejaya/slope-calculator
 homepage=https://github.com/irenejaya/slope-calculator
 
-tags=python,hydrology,slope,river,reach,DEM,equal area slope,ARR,RORB,drainage
+tags=python,hydrology,slope,river,reach,DEM,equal area slope,ARR,RORB,drainage,stream
 
 icon=icon.svg
 
