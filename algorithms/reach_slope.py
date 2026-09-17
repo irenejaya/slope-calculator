@@ -224,7 +224,15 @@ class ReachSlopeAlgorithm(QgsProcessingAlgorithm):
 
         total = reaches.featureCount()
         null_count = 0
+        multipart_count = 0
+        features_written = 0
         n_input_fields = reaches.fields().count()
+
+        feedback.pushInfo(
+            'Input layer contains {} feature(s). This algorithm writes exactly '
+            'one output feature per input feature (it never splits or merges '
+            'geometries).'.format(total)
+        )
 
         for i, feat in enumerate(reaches.getFeatures()):
             if feedback.isCanceled():
@@ -248,6 +256,8 @@ class ReachSlopeAlgorithm(QgsProcessingAlgorithm):
                 )
                 null_count += 1
             else:
+                if geom.isMultipart():
+                    multipart_count += 1
                 try:
                     metric_len = da.measureLength(geom)
 
@@ -300,8 +310,23 @@ class ReachSlopeAlgorithm(QgsProcessingAlgorithm):
                 )
 
             sink.addFeature(out_feat, QgsFeatureSink.Flag.FastInsert)
+            features_written += 1
 
         feedback.setProgress(100)
+
+        feedback.pushInfo(
+            'Wrote {} output feature(s) (input had {}).'.format(features_written, total)
+        )
+
+        if multipart_count:
+            feedback.pushWarning(
+                '{} input feature(s) are multi-part geometries. Each still '
+                'produces exactly one output row — if the output feature count '
+                'is higher than expected, check the input layer\'s attribute '
+                'table row count (e.g. a stream network split into many '
+                'segments at confluences), rather than this algorithm.'
+                .format(multipart_count)
+            )
 
         if null_count:
             feedback.pushWarning(
