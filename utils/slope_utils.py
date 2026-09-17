@@ -9,7 +9,7 @@ Provides DEM sampling along a line geometry and two slope methods:
 
 from typing import List, Tuple, Optional
 
-from qgis.core import QgsPointXY
+from qgis.core import QgsPointXY, QgsCsException, QgsMessageLog, Qgis
 
 
 def sample_dem_at_endpoints(geometry, dem_provider, transform=None):
@@ -34,7 +34,7 @@ def sample_dem_at_endpoints(geometry, dem_provider, transform=None):
     if transform is not None:
         try:
             pts = [transform.transform(p) for p in pts]
-        except Exception:
+        except QgsCsException:
             return None
 
     elevations = []
@@ -101,7 +101,11 @@ def sample_dem_along_line(
         if transform is not None:
             try:
                 pt = transform.transform(pt)
-            except Exception:
+            except QgsCsException as exc:
+                QgsMessageLog.logMessage(
+                    'Coordinate transform failed while sampling DEM: {}'.format(exc),
+                    'River Slope Calculator', Qgis.Warning,
+                )
                 continue
 
         val, ok = dem_provider.sample(QgsPointXY(pt.x(), pt.y()), 1)
